@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Route, Link } from 'react-router-dom';
+import { Route, Link, NavLink } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import AdminPage from './routes/AdminPage';
@@ -20,6 +20,11 @@ class Root extends Component {
         return (
             <div>
                 {btn}
+                <ul>
+                    <li><NavLink to="/admin" activeStyle={{ color: 'blue' }}>Admin</NavLink></li>
+                    <li><NavLink to="/people" activeStyle={{ color: 'blue' }}>People</NavLink></li>
+                    <li><NavLink to="/events" activeStyle={{ color: 'blue' }}>Events</NavLink></li>
+                </ul>
                 <ProtectedRoute path="/admin" component={AdminPage} />
                 <ProtectedRoute path="/people" component={PersonPage} />
                 <ProtectedRoute path="/events" component={EventsPage} />

@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Table, Column, InfiniteLoader } from 'react-virtualized';
+
+import DraggableTableRow from './DraggableTableRow';
 import { moduleName, fetchLazy, selectEvent, eventListSelector } from '../../ducks/events';
 
 import 'react-virtualized/styles.css'
@@ -20,6 +22,9 @@ export class EventList extends Component {
         return this.props.events[index];
     }
 
+    rowRenderer = ({ index, key, ...rest }) => <DraggableTableRow event={this.props.events[index]} index={index} {...rest} key={key} />
+
+
     handleRowClick = ({ rowData }) => {
         const { selectEvent } = this.props;
         selectEvent && selectEvent(rowData.uid);
@@ -38,6 +43,7 @@ export class EventList extends Component {
                         ref={registerChild}
                         rowCount={events.length}
                         rowGetter={this.rowGetter}
+                        rowRenderer={this.rowRenderer}
                         rowHeight={40}
                         headerHeight={50}
                         overscanRowCount={5}

@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import PeopleList from '../people/PeopleList';
 import SelectedEvents from '../events/SelectedEvents';
 import EventsList from '../events/VirtualizedEventList';
+import Trash from '../Trash';
 
 class AdminPage extends Component {
     render() {
@@ -12,6 +13,7 @@ class AdminPage extends Component {
                 <PeopleList />
                 <SelectedEvents />
                 <EventsList />
+                <Trash />
             </div>
         )
     }

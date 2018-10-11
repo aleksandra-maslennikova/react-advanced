@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { DragLayer } from 'react-dnd';
 import PersonDragPreview from '../components/people/PersonDragPreview';
+import EventDragPreview from '../components/events/EventDragPreview';
 
 const layerStyle = {
     position: 'fixed',
@@ -13,19 +14,21 @@ const layerStyle = {
 };
 
 const previewMap = {
-    person: PersonDragPreview
+    person: PersonDragPreview,
+    event: EventDragPreview
 };
 
 class CustomDragLayer extends Component {
     getItem() {
         const { offset, item, itemType } = this.props;
         const PreviewComponent = previewMap[itemType];
-
+        console.log('offcet', offset);
         if (!offset || !PreviewComponent) return null;
-        const style = {
-            transform: `translate(${x}px, ${y}px)`
-        }
         const { x, y } = offset;
+        const style = {
+            transform: `translate(${x}px, ${y}px)`,
+            display: 'inline-block'
+        }
         return (<div style={style}><PreviewComponent {...item} /></div>)
 
     }

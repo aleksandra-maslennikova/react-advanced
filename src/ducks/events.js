@@ -5,6 +5,7 @@ import { Record, OrderedMap, OrderedSet } from 'immutable';
 
 import { appName } from '../config';
 import { fbDatatoEntities } from './utils';
+import { takeEvery } from 'redux-saga';
 
 // Constants
 
@@ -17,9 +18,12 @@ export const FETCH_LAZY_REQUEST = `${prefix}/FETCH_LAZY_REQUEST`;
 export const FETCH_LAZY_START = `${prefix}/FETCH_LAZY_START`;
 export const FETCH_LAZY_SUCCESS = `${prefix}/FETCH_LAZY_SUCCESS`;
 export const SELECT_EVENT = `${prefix}/SELECT_EVENT`;
+export const DELETE_EVENT_REQUEST = `${prefix}/DELETE_EVENT_REQUEST`;
+export const DELETE_EVENT_SUCCESS = `${prefix}/DELETE_EVENT_SUCCESS`;
+export const DELETE_EVENT_ERROR = `${prefix}/DELETE_EVENT_ERROR`;
 
 // Reducer
- 
+
 export const ReducerRecord = Record({
     entities: new OrderedMap({}),
     selected: new OrderedSet([]),
@@ -63,6 +67,13 @@ export default function reducer(state = new ReducerRecord(), action) {
                 ? state.update('selected', selected => selected.remove(payload.uid))
                 : state.update('selected', selected => selected.add(payload.uid))
 
+        case DELETE_EVENT_REQUEST:
+            return state.set('loading', true)
+        case DELETE_EVENT_SUCCESS:
+            return state
+                .set('loading', false)
+                .deleteIn(['entities', payload.uid])
+
         default:
             return state
     }
@@ -80,6 +91,9 @@ export const selectedSelector = createSelector(stateSelector, state => state.sel
 export const selectedEventsSelector = createSelector(entitiesSelector, selectedSelector, (entities, selected) => (
     selected.toArray().map(uid => entities.get(uid))
 ));
+
+const idSelector = (_, props) => props.uid;
+export const eventSelector = createSelector(entitiesSelector, idSelector, (entities, id) => entities.get(id));
 
 
 // Action Creators
@@ -102,6 +116,12 @@ export function fetchLazy() {
         type: FETCH_LAZY_REQUEST
     }
 };
+export function deleteEvent(uid) {
+    return {
+        type: DELETE_EVENT_REQUEST,
+        payload: { uid }
+    }
+};
 
 // Sagas
 
@@ -120,6 +140,8 @@ export const fetchAllSaga = function* () {
         })
     }
 };
+
+
 
 export const fetchLazySaga = function* () {
     while (true) {
@@ -149,9 +171,31 @@ export const fetchLazySaga = function* () {
     }
 };
 
+
+export const deleteEventSaga = function* (action) {
+    const { payload } = action;
+    const eventRef = firebase.database().ref(`events/${payload.uid}`)
+    try {
+        yield call([eventRef, eventRef.remove]);
+        yield put({
+            type: DELETE_EVENT_SUCCESS,
+            payload
+        })
+    } catch (error) {
+        yield put({
+            type: DELETE_EVENT_ERROR,
+            error
+        })
+    }
+};
+
+
+
+
 export function* saga() {
     yield all([
         fetchAllSaga(),
-        fetchLazySaga()
+        fetchLazySaga(),
+        takeEvery(DELETE_EVENT_REQUEST, deleteEventSaga)
     ])
 };

@@ -1,7 +1,8 @@
 import firebase from 'firebase';
 import { Record, List, OrderedMap } from 'immutable';
 import { reset } from 'redux-form';
-import { put, call, takeEvery, all, select } from 'redux-saga/effects';
+import { put, call, takeEvery, all, select, spawn, fork, cancel, cancelled, race } from 'redux-saga/effects';
+import { delay } from 'redux-saga';
 import { createSelector } from 'reselect';
 
 import { appName } from '../config';
@@ -65,7 +66,7 @@ export const stateSelector = state => state[moduleName];
 export const entitiesSelector = createSelector(stateSelector, state => state.entities);
 export const peopleListSelector = createSelector(entitiesSelector, entities => entities.valueSeq().toArray());
 const idSelector = (_, props) => props.uid;
-export const personSelector = createSelector(entitiesSelector, idSelector, (entities, id)=>entities.get(id));
+export const personSelector = createSelector(entitiesSelector, idSelector, (entities, id) => entities.get(id));
 
 // Action creators
 export function addPerson(person) {
@@ -146,7 +147,34 @@ export function* addEventToPersonSaga(action) {
     }
 }
 
+export const backgroundSyncSaga = function* () {
+    try {
+        while (true) {
+            yield call(fetchAllPeopleSaga)
+            yield delay(6000)
+        }
+    } finally {
+        if (yield cancelled()){
+            console.log('cancelled saga')
+        }
+    }
+}
+
+export const cancellableSyncSaga = function* () {
+   // two ways to cancel saga
+    yield race({
+        sync: backgroundSyncSaga(),
+        delay: delay(6000)
+    })
+   
+    /* 
+   const task = yield fork(backgroundSyncSaga)  
+    yield delay(6000)
+    yield cancel(task)*/ 
+}
+
 export const saga = function* () {
+    yield spawn(cancellableSyncSaga)
     yield all([
         takeEvery(ADD_PERSON_REQUEST, addPersonSaga),
         takeEvery(FETCH_ALL_PEOPLE_REQUEST, fetchAllPeopleSaga),

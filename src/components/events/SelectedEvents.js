@@ -6,7 +6,6 @@ import SelectedEventCard from './SelectedEventCard';
 
 class SelectedEvents extends Component {
     render() {
-        console.log('events', this.props.events);
         return (
             <div>
                 {this.props.events && this.props.events.map(event => <SelectedEventCard event={event} key={event.uid} />)}
