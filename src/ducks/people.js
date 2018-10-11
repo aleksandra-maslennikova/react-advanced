@@ -195,7 +195,6 @@ export const realtimeSync = function* () {
                 type: FETCH_ALL_PEOPLE_SUCCESS,
                 payload: data.val()
             })
-            console.log('newdata', data.val());
         }
     } finally {
         yield call([channel, channel.close]); // unsubscribe from eventChannel
