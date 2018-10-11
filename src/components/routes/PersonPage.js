@@ -11,11 +11,13 @@ import { addPerson, moduleName } from '../../ducks/people';
 class PersonPage extends Component {
     render() {
         const { loading } = this.props;
+        console.log('personPage', this.props);
         return (
-            <PeopleList>
-                <PeopleTable />
+            <div>
+                <PeopleList />
                 {loading ? <Loader /> : <NewPersonForm onSubmit={this.props.addPerson} />}
-            </PeopleList>
+            </div>
+
         )
     }
 }

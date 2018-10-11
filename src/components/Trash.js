@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
 import { DropTarget } from 'react-dnd';
 import { connect } from 'react-redux';
-
 import Loader from './common/Loader';
 import { deleteEvent, moduleName } from '../ducks/events';
 
 class Trash extends Component {
     render() {
-        const { canDrop, hovered, connectDropTarget, loading } = this.props;
+        const { canDrop, hovered, connectDropTarget } = this.props;
         const trashStyle = {
             position: 'fixed',
             top: '15px',
@@ -21,8 +20,6 @@ class Trash extends Component {
             alignItems: 'center',
             justifyContent: 'center'
         };
-        if (loading) return <Loader />
-
         return connectDropTarget(<div style={trashStyle}>Trash</div>)
     }
 }
@@ -40,6 +37,4 @@ const collect = (connect, monitor) => ({
     hovered: monitor.isOver()
 });
 
-export default connect(state => ({
-    loading: state[moduleName].loading
-}), { deleteEvent })(DropTarget(['event'], spec, collect)(Trash))
+export default connect(null, { deleteEvent })(DropTarget(['event'], spec, collect)(Trash))

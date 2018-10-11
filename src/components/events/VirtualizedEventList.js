@@ -22,8 +22,7 @@ export class EventList extends Component {
         return this.props.events[index];
     }
 
-    rowRenderer = ({ index, key, ...rest }) => <DraggableTableRow event={this.props.events[index]} index={index} {...rest} key={key} />
-
+    rowRenderer = (props) => <DraggableTableRow {...props} />
 
     handleRowClick = ({ rowData }) => {
         const { selectEvent } = this.props;

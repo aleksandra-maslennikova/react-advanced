@@ -39,7 +39,6 @@ class PeopleTable extends Component {
         )
     }
     rowGetter = ({ index }) => {
-        console.log('index', index);
         return this.props.people[index];
     }
 }

@@ -1,8 +1,8 @@
 import firebase from 'firebase';
 import { Record, List, OrderedMap } from 'immutable';
 import { reset } from 'redux-form';
-import { put, call, takeEvery, all, select, spawn, fork, cancel, cancelled, race } from 'redux-saga/effects';
-import { delay } from 'redux-saga';
+import { put, call, takeEvery, all, select, spawn, fork, cancel, cancelled, race, take } from 'redux-saga/effects';
+import { delay, eventChannel } from 'redux-saga';
 import { createSelector } from 'reselect';
 
 import { appName } from '../config';
@@ -12,8 +12,7 @@ import { generateId, fbDatatoEntities } from './utils';
 // Constants
 const ReducerState = Record({
     entities: new OrderedMap([]),
-    loading: false,
-    loaded: false
+    loading: false
 });
 
 const PersonRecord = Record({
@@ -154,27 +153,58 @@ export const backgroundSyncSaga = function* () {
             yield delay(6000)
         }
     } finally {
-        if (yield cancelled()){
+        if (yield cancelled()) {
             console.log('cancelled saga')
         }
     }
 }
 
 export const cancellableSyncSaga = function* () {
-   // two ways to cancel saga
+
     yield race({
-        sync: backgroundSyncSaga(),
+        sync: realtimeSync(),
         delay: delay(6000)
     })
-   
+
+
+    // two ways to cancel saga
+    /*yield race({
+        sync: backgroundSyncSaga(),
+        delay: delay(6000)
+    })*/
+
     /* 
    const task = yield fork(backgroundSyncSaga)  
     yield delay(6000)
-    yield cancel(task)*/ 
+    yield cancel(task)*/
+}
+
+export const createPeopleSocket = () => eventChannel(emmit => {
+    const ref = firebase.database().ref('people');
+    const callback = data => emmit({ data });
+    ref.on('value', callback);
+    return () => ref.off('value', callback);
+});
+
+export const realtimeSync = function* () {
+    const channel = yield call(createPeopleSocket);
+    try {
+        while (true) {
+            const { data } = yield take(channel);
+            yield put({
+                type: FETCH_ALL_PEOPLE_SUCCESS,
+                payload: data.val()
+            })
+            console.log('newdata', data.val());
+        }
+    } finally {
+        yield call([channel, channel.close]); // unsubscribe from eventChannel
+    }
 }
 
 export const saga = function* () {
     yield spawn(cancellableSyncSaga)
+    // yield spawn(realtimeSync)
     yield all([
         takeEvery(ADD_PERSON_REQUEST, addPersonSaga),
         takeEvery(FETCH_ALL_PEOPLE_REQUEST, fetchAllPeopleSaga),
