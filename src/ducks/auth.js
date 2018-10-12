@@ -54,7 +54,6 @@ export default function reducer(state = new ReducerRecord(), action) {
     }
 };
 
-
 // Action creators
 
 export function signUp(email, password) {

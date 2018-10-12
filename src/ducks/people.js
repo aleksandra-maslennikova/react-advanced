@@ -179,9 +179,9 @@ export const cancellableSyncSaga = function* () {
     yield cancel(task)*/
 }
 
-export const createPeopleSocket = () => eventChannel(emmit => {
+export const createPeopleSocket = () => eventChannel(emit => {
     const ref = firebase.database().ref('people');
-    const callback = data => emmit({ data });
+    const callback = data => emit({ data });
     ref.on('value', callback);
     return () => ref.off('value', callback);
 });

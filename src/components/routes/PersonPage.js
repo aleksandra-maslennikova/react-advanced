@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 
 import NewPersonForm from '../people/NewPersonForm';
 import PeopleTable from '../people/PeopleTable';
-import PeopleList from '../people/PeopleList';
 import Loader from '../common/Loader';
 
 import { addPerson, moduleName } from '../../ducks/people';
@@ -14,7 +13,7 @@ class PersonPage extends Component {
         console.log('personPage', this.props);
         return (
             <div>
-                <PeopleList />
+                <PeopleTable />
                 {loading ? <Loader /> : <NewPersonForm onSubmit={this.props.addPerson} />}
             </div>
 
